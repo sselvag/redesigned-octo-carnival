@@ -66,22 +66,32 @@ $(document).ready(function () {
             url: forecastURL,
             method: "GET"
         }).then(function (forecast) {
-            var cardLength = 5;           
+            var fiveDayArr = [];
+            var nextDay = 0;
+            $.each(forecast.list, function (i, value) { 
+                var apiDate = moment.unix(value.dt).format();
+                var matchDate = moment.utc().add(nextDay + 1, 'days').hour(12).minutes(0).second(0).format();
+                if (moment(apiDate).isSame(matchDate, "day") && moment(apiDate).isSame(matchDate, "hour")) {
+                    fiveDayArr.push(value);
+                    nextDay++;
+                };
+            });
             $(".card-deck").empty();
             $(".forecast").show();
-            for (var i = 0; i < cardLength; i++) {
-                var cardCreation = $("<div>").addClass("card text-white bg-primary mb-2").attr("id", "card" + i);
+            $.each(fiveDayArr, function (i, fiveDays) { 
+                var forecastDate = moment.unix(fiveDays.dt).format("l");
+                var cardCreation = $("<div>").addClass("card text-white bg-primary mb-2");
                 var cardBody = $("<div>").addClass("card-body");
-                cardBody.append($("<h5>").addClass("card-title").text(moment().add(i + 1, 'days').format('l')));
-                cardBody.append($("<img>").addClass("card-icon").attr("src", "https://openweathermap.org/img/wn/" + forecast.list[i].weather[0].icon + "@2x.png").attr("title", forecast.list[i].weather[0].main).attr("alt", forecast.list[i].weather[0].main));
-                cardBody.append($("<p>").addClass("card-temperature").addClass("my-1").text("Temp: " + forecast.list[i].main.temp + " °F"));
-                cardBody.append($("<p>").addClass("card-humidity").text("Humidity: " + forecast.list[i].main.humidity + "%"));
+                cardBody.append($("<h5>").addClass("card-title").text(forecastDate));
+                cardBody.append($("<img>").addClass("card-icon").attr("src", "https://openweathermap.org/img/wn/" + fiveDays.weather[0].icon + "@2x.png").attr("title", fiveDays.weather[0].main).attr("alt", fiveDays.weather[0].main));
+                cardBody.append($("<p>").addClass("card-temperature").addClass("my-1").text("Temp: " + fiveDays.main.temp + " °F"));
+                cardBody.append($("<p>").addClass("card-humidity").text("Humidity: " + fiveDays.main.humidity + "%"));
                 cardCreation.append(cardBody);
                 $(".card-deck").append(cardCreation);
-            };
+            });
         });
     };
-    function historyList() { 
+    function historyList() {
         $.each(cityHistory, function (i, value) {
             $(".history").prepend($("<li>").addClass("list-group-item text-secondary").text(value));
         });
