@@ -14,17 +14,38 @@ $(document).ready(function () {
 
     $("button").click(function () {
 
-        var apiKey = "8c20fecf1dc12b4c826b47b8de6dbee6"
-
         var city = $("#search").val();
         console.log("The city being searched is " + city)
 
+        if (jQuery.inArray(city, cityHistory) === -1) {
 
-        cityHistory.push(city);
+            cityHistory.push(city);
+        }
+
+        if (cityHistory.length > 8) {
+            cityHistory.shift(); // removes the first element from an array 
+        }
         console.log(cityHistory);
 
         $(".history").empty()
         historyList();
+        displayWeather();
+
+        localStorage.setItem("City History", JSON.stringify(cityHistory));
+
+    })
+
+    function historyList() {
+
+        $.each(cityHistory, function (i, value) {
+
+            $(".history").prepend($("<li>").addClass("list-group-item text-secondary").text(value));
+
+        })
+    }
+
+    function displayWeather() {
+        var apiKey = "8c20fecf1dc12b4c826b47b8de6dbee6"
 
         var currentWeatherURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + apiKey;
 
@@ -61,18 +82,6 @@ $(document).ready(function () {
         }).then(function (forecast) {
             console.log("Current forecast URL is: " + forecastURL);
             console.log(forecast);
-        })
-
-        localStorage.setItem("City History", JSON.stringify(cityHistory));
-
-    })
-
-    function historyList() {
-
-        $.each(cityHistory, function (i, value) {
-
-            $(".history").prepend($("<div>").text(value));
-
         })
     }
 })
